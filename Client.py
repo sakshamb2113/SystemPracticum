@@ -5,48 +5,36 @@ import logging
 logging.basicConfig(filename="client.log", filemode="w", format='%(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
 class client:
-    def __init__(self, config):
+    def __init__(self):
+        config = Read_Config(".config")
         self.host = config["host"]
         self.port = int(config["port"])
         self.server = (self.host, self.port)
-        
-        # Connecting to Server
-        self.connect()
-        logging.info("Connected to Server " + self.host + ":" + str(self.port))
-
-        # Sending username to Server
-        username = input("Enter UserName : ")
-        self.socket.send(username.encode("utf-8"))
-
-        # Creating Individual Threads for listening to Server and to Sending msgs to Server
-        threading.Thread(target=self.getMesseges).start()
-        threading.Thread(target=self.sendCommands).start()
     
+    # Establishing Connection to Server
     def connect(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect(self.server)
+        
+        logging.info("Connected to Server " + self.host + ":" + str(self.port))
+
+    # Sending username to Server
+    def setUsername(self, username):
+        self.socket.send(username.encode("utf-8"))
+        logging.info("Username Set To " + username)
     
+    # Getting Messages from Server
     def getMesseges(self):
-        while (True):
-            msg = str(self.socket.recv(1024).decode('utf-8'))
+        msg = str(self.socket.recv(1024).decode('utf-8'))
+        logging.info("Recieved " + msg)
 
-            logging.info("Recieved " + msg)
-            if (msg == "exit"):
-                break
+        return msg
 
-            print("Server > ", msg)
-        
-        logging.info("Ending getMesseges")
+    # Sending Message to Server
+    def sendCommands(self, msg):
+        logging.info("Sending " + msg)
+        self.socket.send(msg.encode("utf-8"))
 
-    def sendCommands(self):
-        while(True):
-            msg = input("__YOU__>")
-            logging.info("Sending " + msg)
-            self.socket.send(msg.encode("utf-8"))
-            if (msg == "exit"):
-                break
-        
-        logging.info("Ending sendCommands")
 
 def Read_Config(filepath):
     config = {}

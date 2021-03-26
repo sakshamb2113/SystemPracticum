@@ -1,7 +1,6 @@
 import socket
 import threading
 import logging
-import time
 
 logging.basicConfig(filename="server.log", filemode="w", format='%(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
@@ -9,6 +8,7 @@ class server():
     def __init__(self, config):
         self.host = config["host"]
         self.port = int(config["port"])
+        self.users = {}
 
         # Setting up Main Server Socket
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -39,6 +39,8 @@ class server():
         username = str(conn.recv(1024).decode('utf-8'))
         logging.info("Connect to " + username)
 
+        self.users[username] = conn
+
         # Recieving Incoming Messages 
         while (True):
             data = str(conn.recv(1024).decode('utf-8'))
@@ -46,8 +48,10 @@ class server():
                 break
 
             # Sending those messages to all users
-            conn.sendall(data.encode('utf-8'))
-            logging.info("Recieved " + data + " from " + username)
+            for c in self.users.values():
+                c.send(data.encode('utf-8'))
+            
+            logging.info("Recieved " + data)
 
         conn.send("exit".encode('utf-8'))
 

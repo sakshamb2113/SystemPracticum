@@ -7,3 +7,6 @@
 # logs
 server.log
 *.log
+
+# PyQt5 Cachce
+__pycache__
