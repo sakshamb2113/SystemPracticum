@@ -1,0 +1,9 @@
+# virtual environment files
+.env
+
+# Config File
+.config
+
+# logs
+server.log
+*.log
