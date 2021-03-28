@@ -44,15 +44,15 @@ class server():
         # Recieving Incoming Messages 
         while (True):
             data = str(conn.recv(1024).decode('utf-8'))
+            logging.info("Recieved " + data)
             if (data == "exit"):
                 break
 
             # Sending those messages to all users
             for c in self.users.values():
                 c.send(data.encode('utf-8'))
-            
-            logging.info("Recieved " + data)
-
+        
+        logging.info("Sending exit to " + username)
         conn.send("exit".encode('utf-8'))
 
         logging.info("Closing " + username)

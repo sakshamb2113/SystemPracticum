@@ -15,25 +15,28 @@ class MainWindow(QMainWindow):
         self.setFixedSize(600, 600)
 
         self.SetupUI()
+
         self.dialog = self.connectDialog()
-        self.dialog.show()
+        self.dialog.exec_()
 
 
+    # Establishing Connection
     def connect(self):
         self.client.connect()
 
         self.dialog.close()
         self.dialog = self.usernameDialog()
-        self.dialog.show()
+        self.dialog.exec_()
 
-
+    # get Username Dialog 
     def usernameDialog(self):
-        dialog = QDialog(self)
+        dialog = ModalDialog(self)
         dialog.setFixedSize(400,200)
 
         usernameInput = QLineEdit(dialog)
         usernameInput.setPlaceholderText("Username...")
         button = QPushButton("Set Username", dialog)
+        button.setDefault(True)
         button.clicked.connect(lambda: self.setUsername(usernameInput.text()))
 
         innerLayout = QHBoxLayout()
@@ -51,20 +54,23 @@ class MainWindow(QMainWindow):
 
         return dialog
     
+    # Sending Server the current Clients username
     def setUsername(self, username):
         self.client.setUsername(username)
         self.username = username
 
         self.dialog.close()
 
-        self.recieverThread = threading.Thread(target=self.recieveMessage)
+        self.recieverThread = threading.Thread(target=self.recieveMessage, daemon=True)
         self.recieverThread.start()
 
+    # Initial Dialog asking consent establish Connection
     def connectDialog(self):
-        dialog = QDialog(self)
+        dialog = ModalDialog(self)
         dialog.setFixedSize(400,200)
 
         button = QPushButton("Contect", dialog)
+        button.setDefault(True)
         button.clicked.connect(self.connect)
 
         innerLayout = QHBoxLayout()
@@ -95,6 +101,7 @@ class MainWindow(QMainWindow):
 
         # Send Message Button
         self.sendButton = QPushButton("Send", self.centralWidget)
+        self.sendButton.setDefault(True)
         self.sendButton.clicked.connect(self.sendMessage)
 
         # Join Voice Button
@@ -110,16 +117,39 @@ class MainWindow(QMainWindow):
 
         self.centralWidget.setLayout(self.centralLayout)
     
+    # Wrapper for Sending Commands
     def sendMessage(self):
         message = self.inputField.text()
+        self.inputField.setText("")
         if (message != ""):
             self.client.sendCommands(self.username + " : " + message)
     
+    # Wrapper for recieving Incoming Messages
     def recieveMessage(self):
         while (True):
             message = self.client.getMesseges()
+            if(message == 'exit'):
+                break
 
-            self.chatDisplay.append(message + "\n")
+            self.chatDisplay.append(message)
+    
+    # Closing socket when user tries to close the application
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, 'Quit', 'Are You Sure to Quit?', QMessageBox.No | QMessageBox.Yes)
+        if (reply == QMessageBox.Yes):
+            # Informing Server about closing socket
+            self.client.sendCommands("exit")
+            
+            # waiting for recieverThread to notice 
+            self.recieverThread.join()
+
+            # Closing Socket
+            self.client.close()
+
+            # Closing the application
+            event.accept()
+        else:
+            event.ignore()
 
 
 def Read_Config(filepath):
@@ -130,6 +160,15 @@ def Read_Config(filepath):
             config[line[0].strip()] = line[1].strip()
     
     return config
+
+
+class ModalDialog(QDialog):
+    def __init__(self, parent=None):
+        super(ModalDialog, self).__init__(parent)
+
+        # Blocking Input to all other Dialogs when this Dialog open
+        self.setWindowModality(Qt.ApplicationModal)
+        self.setWindowFlag(Qt.WindowCloseButtonHint, False)
 
 
 if __name__ == "__main__":

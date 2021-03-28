@@ -34,6 +34,11 @@ class client:
     def sendCommands(self, msg):
         logging.info("Sending " + msg)
         self.socket.send(msg.encode("utf-8"))
+    
+    # Closing Connection
+    def close(self):
+        self.socket.close()
+        logging.info("Connection Closed")
 
 
 def Read_Config(filepath):
