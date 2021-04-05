@@ -22,3 +22,17 @@ payload
 - GAMEJOIN : Game Join Request
 - GAMEUPDT : Game Info
 - EXITGAME : Game Exit Request
+
+# How to run
+ - create a .config file with the required host and port
+```
+host=127.0.0.1
+port=10000
+```
+
+ - create a virtual env `python -m venv .env`
+ - activate the virtual env `source ./.env/bin/activate`
+ - install the required libraries `pip install -r requirements.txt`
+ - Run Server `python Server.py`
+ - open multiple new terminals and activate virtual environment in them
+ - Run Client in each of them `python ClientApp.py`
