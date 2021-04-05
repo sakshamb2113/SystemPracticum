@@ -1,6 +1,7 @@
 import socket
 import threading
 import logging 
+from protocols import protocol
 
 logging.basicConfig(filename="client.log", filemode="w", format='%(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
@@ -10,6 +11,7 @@ class client:
         self.host = config["host"]
         self.port = int(config["port"])
         self.server = (self.host, self.port)
+        self.username = "UNKNOWN"
     
     # Establishing Connection to Server
     def connect(self):
@@ -20,7 +22,10 @@ class client:
 
     # Sending username to Server
     def setUsername(self, username):
-        self.socket.send(username.encode("utf-8"))
+        msg = self.__wrap(protocol.SETUSERNAME, username)
+        self.socket.send(msg.encode("utf-8"))
+        self.username = username
+
         logging.info("Username Set To " + username)
     
     # Getting Messages from Server
@@ -28,12 +33,29 @@ class client:
         msg = str(self.socket.recv(1024).decode('utf-8'))
         logging.info("Recieved " + msg)
 
-        return msg
+        return self.__parse(msg)
+    
+    # Parsing messages
+    def __parse(self, msg):
+        header = msg[0:8]
+        sender = msg[8:30].rstrip('_')
+        payload = msg[34:]
+
+        return (header, sender, payload)
 
     # Sending Message to Server
-    def sendCommands(self, msg):
+    def sendCommands(self, header, payload = ""):
+        msg = self.__wrap(header, payload)
+        
         logging.info("Sending " + msg)
+        
         self.socket.send(msg.encode("utf-8"))
+    
+    # Wrapping Messages
+    def __wrap(self, header, payload):
+        msg = header + self.username.ljust(22, "_") + str(len(payload)).rjust(4, "0") + payload
+
+        return msg
     
     # Closing Connection
     def close(self):

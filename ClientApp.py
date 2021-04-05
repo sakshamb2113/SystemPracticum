@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import *
 import sys
 from Client import client
 import threading
+from protocols import protocol
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -58,6 +59,11 @@ class MainWindow(QMainWindow):
     def setUsername(self, username):
         self.client.setUsername(username)
         self.username = username
+
+        header, sender, payload = self.client.getMesseges()
+        if (header != protocol.ACCEPT):
+            print(header, sender, payload)
+            return
 
         self.dialog.close()
 
@@ -122,23 +128,27 @@ class MainWindow(QMainWindow):
         message = self.inputField.text()
         self.inputField.setText("")
         if (message != ""):
-            self.client.sendCommands(self.username + " : " + message)
+            self.client.sendCommands(protocol.MESSAGE, message)
     
     # Wrapper for recieving Incoming Messages
     def recieveMessage(self):
         while (True):
-            message = self.client.getMesseges()
-            if(message == 'exit'):
+            header, sender, payload = self.client.getMesseges()
+            if(header == protocol.EXIT):
                 break
-
-            self.chatDisplay.append(message)
+            
+            elif (header == protocol.MESSAGE):
+                self.chatDisplay.append(sender + " > " + payload)
+            
+            else:
+                print("Unknown header : ", header)
     
     # Closing socket when user tries to close the application
     def closeEvent(self, event):
         reply = QMessageBox.question(self, 'Quit', 'Are You Sure to Quit?', QMessageBox.No | QMessageBox.Yes)
         if (reply == QMessageBox.Yes):
             # Informing Server about closing socket
-            self.client.sendCommands("exit")
+            self.client.sendCommands(protocol.EXIT)
             
             # waiting for recieverThread to notice 
             self.recieverThread.join()

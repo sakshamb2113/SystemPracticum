@@ -1,0 +1,10 @@
+class protocol:
+    SETUSERNAME =   "SETUSRNM"
+    ACCEPT =        "ACCEPT__"
+    REJECT =        "REJECT__"
+    CREATEROOM =    "CREATERM"
+    GETROOMLIST =   "GETROOMS"
+    ROOMLIST =      "LISTROOM"
+    JOINROOM =      "JOINROOM" 
+    MESSAGE =       "MESSAGE_"
+    EXIT =          "EXIT____"
