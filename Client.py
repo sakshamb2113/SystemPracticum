@@ -1,6 +1,7 @@
+import logging
 import socket
 import threading
-import logging 
+
 from protocols import protocol
 
 logging.basicConfig(filename="client.log", filemode="w", format='%(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)

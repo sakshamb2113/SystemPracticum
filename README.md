@@ -14,6 +14,7 @@ payload
 - GETROOMS : Get List of Rooms
 - LISTROOM : List of Available Rooms Sent by the Server
 - ROOMJOIN : Room Join Request
+- EXITROOM : Exit to lobby
 - MESSAGE_ : Chat Message
 - EXIT____ : Close Connection
 - VCEJOIN_ : Voice Join Request
