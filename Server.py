@@ -60,13 +60,13 @@ class server():
 
         # Sending Response
         if (room != "lobby"):
-            self.sendMessageToRoom(room, self.__wrap(protocol.UPDATE, "SERVER", usr + " has joined the room."))
+            self.sendMessageToRoom(room, self.__wrap(protocol.UPDATE, "SERVER", usr + " has joined the room " + room))
 
 
     def leaveRoom(self, usr, room):
         # informing people that username has left there room
         if (room != "lobby"):
-            self.sendMessageToRoom(room, self.__wrap(protocol.UPDATE, "SERVER", usr + " has left the room."))
+            self.sendMessageToRoom(room, self.__wrap(protocol.UPDATE, "SERVER", usr + " has left the room " + room))
 
         # Removing user from old room
         self.rooms[room].remove(usr)
@@ -157,6 +157,9 @@ class server():
                     conn.send(self.__wrap(protocol.REJECT, "SERVER", "Please Enter a valid room-name"))
                     logging.debug("Incorrect Room Name : " + payload + " by " + sender)
 
+                elif (currRoom == payload):
+                    conn.send(self.__wrap(protocol.REJECT, "SERVER", "Already in the mentioned room"))
+
                 else:
                     self.leaveRoom(username, currRoom)
                     currRoom = payload
@@ -184,6 +187,7 @@ class server():
         logging.info("Closing " + username)
         conn.close()
 
+
     def __checkUsername(self, usr):
         if (usr == ""):
             logging.debug("Empty Username")
@@ -207,11 +211,13 @@ class server():
             return False
         
         return True
-    
+
+
     def __wrap(self ,header, sender, payload = ""):
         packet = header + sender.ljust(22, "_") + str(len(payload)).rjust(4, "0") + payload
 
         return packet.encode('utf-8')
+
 
     # Parsing messages
     def __parse(self, msg):
