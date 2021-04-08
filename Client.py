@@ -19,6 +19,7 @@ class client:
         self.port = int(config["port"])
         self.server = (self.host, self.port)
         self.username = "UNKNOWN"
+        self.__lock__ = threading.Lock()
 
     # Establishing Connection to Server
     def connect(self):
@@ -30,17 +31,29 @@ class client:
     # Sending username to Server
     def setUsername(self, username):
         msg = self.__wrap(protocol.SETUSERNAME, username)
-        self.socket.send(msg.encode("utf-8"))
+        self.socket.send(msg)
         self.username = username
 
         logging.info("Username Set To " + username)
 
     # Getting Messages from Server
     def getMesseges(self):
-        msg = str(self.socket.recv(1024).decode("utf-8"))
+
+        msg = self.socket.recv(1024).decode("utf-8")
         logging.info("Recieved " + msg)
 
+        self.socket.send(self.__wrap(protocol.ACKNOLEDGEMENT, self.username))
+        logging.info("Sent Ack")
+
         return self.__parse(msg)
+
+    # Sending Message to Server
+    def sendCommands(self, header, payload=""):
+        msg = self.__wrap(header, payload)
+
+        logging.info("Sending " + str(msg.decode("utf-8")))
+
+        self.socket.send(msg)
 
     # Parsing messages
     def __parse(self, msg):
@@ -49,14 +62,6 @@ class client:
         payload = msg[34:]
 
         return (header, sender, payload)
-
-    # Sending Message to Server
-    def sendCommands(self, header, payload=""):
-        msg = self.__wrap(header, payload)
-
-        logging.info("Sending " + msg)
-
-        self.socket.send(msg.encode("utf-8"))
 
     # Wrapping Messages
     def __wrap(self, header, payload):
@@ -67,7 +72,7 @@ class client:
             + payload
         )
 
-        return msg
+        return msg.encode("utf-8")
 
     # Closing Connection
     def close(self):

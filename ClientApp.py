@@ -196,6 +196,8 @@ class MainWindow(QMainWindow):
             # waiting for recieverThread to notice
             self.recieverThread.join()
 
+            print("Threads Joined")
+
             # Closing Socket
             self.client.close()
 

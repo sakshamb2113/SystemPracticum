@@ -1,6 +1,7 @@
 import json
 import logging
 import socket
+from time import sleep
 import threading
 
 from protocols import protocol
@@ -23,6 +24,50 @@ helpmsg += "#createroom roomname : Create a new room with the specified name (if
 helpmsg += "#exitroom : exits the current room and goes back into the lobby."
 helpmsg += "----- END List Commands -----<br>"
 helpmsg += "--- END HELP ---<br>"
+
+
+class user:
+    def __init__(self, username, conn, room):
+        self.__conn__ = conn
+        self.__lock__ = threading.Lock()
+        self.name = username
+        self.room = room
+        self.__ack = False
+
+    def __str__(self):
+        return f"User({self.name})"
+
+    def toggleAck(self):
+        self.__ack = True
+
+    def send(self, header, sender, payload=""):
+        msg = _wrap(header, sender, payload)
+        Rheader, Rsender, Rpayload = " ", " ", " "
+
+        logging.debug("Acquiring lock on " + self.name + ".send for  " + msg)
+        self.__lock__.acquire()
+        logging.debug("Acquired lock on " + self.name + ".send for  " + msg)
+
+        logging.info("Sending to " + self.name + " : \t\t" + msg)
+        self.__conn__.send(msg.encode("utf-8"))
+        logging.info("Waiting for ack to " + msg)
+
+        while self.__ack == False:
+            sleep(0.01)
+
+        self.__ack = False
+
+        self.__lock__.release()
+        logging.debug("Released lock on " + self.name + ".send for  " + msg)
+
+        logging.info("Ack Recieved for " + msg)
+
+    def recieve(self):
+        msg = str(self.__conn__.recv(1024).decode("utf-8"))
+
+        logging.info("Recieved : \t\t\t\t" + msg)
+
+        return _parse(msg)
 
 
 class server:
@@ -52,199 +97,237 @@ class server:
             # Assign a new thread to a connection
             threading.Thread(target=self.interact, args=(conn,)).start()
 
-    def sendMessageToRoom(self, room, msg):
+    def sendMessageToRoom(self, room, header, sender, payload=""):
         # Sending those messages to all users in currRoom
         for user in self.rooms[room]:
-            self.users[user].send(msg)
+            self.users[user].send(header, sender, payload)
+
+    def sendMessageToUser(self, user, header, sender, payload=""):
+        # Sending the message to user
+        self.users[user].send(header, sender, payload)
 
     def joinRoom(self, usr, room):
+        logging.debug(usr + " joining room " + room)
         # Adding current user to the room
         self.rooms[room].append(usr)
+        self.users[usr].room = room
 
         # Sending Response
         if room != "lobby":
             self.sendMessageToRoom(
-                room,
-                self.__wrap(
-                    protocol.UPDATE, "SERVER", usr + " has joined the room " + room
-                ),
+                room, protocol.UPDATE, "SERVER", usr + " has joined the room " + room
             )
 
-    def leaveRoom(self, usr, room):
+    def leaveRoom(self, usr):
+        room = self.users[usr].room
+
+        logging.debug(usr + " leaving room " + room)
         # informing people that username has left there room
         if room != "lobby":
             self.sendMessageToRoom(
-                room,
-                self.__wrap(
-                    protocol.UPDATE, "SERVER", usr + " has left the room " + room
-                ),
+                room, protocol.UPDATE, "SERVER", usr + " has left the room " + room
             )
 
         # Removing user from old room
         self.rooms[room].remove(usr)
+        self.users[usr].room = "-"
 
         # if room gets empty then delete it
         if len(self.rooms[room]) == 0 and room != "lobby":
+            logging.debug("Deleting Room " + room)
             self.rooms.pop(room)
+
+    def MESSAGE(self, username, payload):
+        currRoom = self.users[username].room
+        if currRoom == "lobby":
+            self.sendMessageToUser(
+                username, protocol.REJECT, "SERVER", "Join a room to send messages."
+            )
+        else:
+            self.sendMessageToRoom(currRoom, protocol.MESSAGE, username, payload)
+
+    def GETROOMLIST(self, username):
+        roomList = list(self.rooms.keys())
+        roomList.remove("lobby")
+
+        # Sending room list
+        self.sendMessageToUser(
+            username, protocol.ROOMLIST, "SERVER", json.dumps(roomList)
+        )
+
+    def CREATEROOM(self, username, payload):
+        if payload == "lobby":
+            logging.debug("New Room named lobby denied to " + sender)
+            self.sendMessageToUser(
+                username,
+                protocol.REJECT,
+                "SERVER",
+                "lobby is an invalid room name. try something else",
+            )
+
+        elif payload in self.rooms.keys():
+            logging.debug("New Room with Same name as existing denied to " + sender)
+            self.sendMessageToUser(
+                username, protocol.REJECT, "SERVER", "Room name already taken."
+            )
+
+        elif len(payload) > 20:
+            logging.debug("Room Name " + payload + " is too big. Denied " + sender)
+            self.sendMessageToUser(
+                username,
+                protocol.REJECT,
+                "SERVER",
+                "Room name too big, Max Name Size is 20 characters",
+            )
+
+        elif len(payload) < 5:
+            logging.debug("Room Name " + payload + " is too small. Denied " + sender)
+            self.sendMessageToUser(
+                username,
+                protocol.REJECT,
+                "SERVER",
+                "Room name too small, Min Name Size is 5 characters",
+            )
+
+        else:
+            # Creating New Room
+            self.rooms[payload] = []
+
+            self.leaveRoom(username)
+            self.joinRoom(username, payload)
+
+    def JOINROOM(self, username, payload):
+        currRoom = self.users[username].room
+
+        if payload not in self.rooms.keys() or payload == "lobby":
+            self.sendMessageToUser(
+                username, protocol.REJECT, "SERVER", "Please Enter a valid room-name"
+            )
+            logging.debug("Incorrect Room Name : " + payload + " by " + sender)
+
+        elif currRoom == payload:
+            self.sendMessageToUser(
+                username, protocol.REJECT, "SERVER", "Already in the mentioned room"
+            )
+
+        else:
+            self.leaveRoom(username)
+            self.joinRoom(username, payload)
+
+    def LEAVEROOM(self, username):
+        currRoom = self.users[username].room
+
+        if currRoom == "lobby":
+            self.sendMessageToUser(
+                username, protocol.REJECT, "SERVER", "Not in any Room"
+            )
+
+        else:
+            self.leaveRoom(username)
+            currRoom = "lobby"
+            self.joinRoom(username, currRoom)
+
+    def UNKNOWNHEADER(self, username):
+        self.sendMessageToUser(
+            username, protocol.REJECT, "SERVER", "Unknown Header: " + header
+        )
+        logging.debug("Unknown header Recieved")
 
     def interact(self, conn):
         logging.info("New Connection Established")
 
         # get the username
-        header, sender, username = self.__parse(str(conn.recv(1024).decode("utf-8")))
-        currRoom = "lobby"
+        header, sender, username = _parse(conn.recv(1024).decode("utf-8"))
 
         while self.__checkUsername(username) == False:
-            conn.send(self.__wrap(protocol.REJECT, "SERVER", "Username Invalid"))
-            header, sender, username = self.__parse(
-                str(conn.recv(1024).decode("utf-8"))
+            conn.send(
+                _wrap(protocol.REJECT, "SERVER", "Username Invalid").encode("utf-8")
             )
 
-        conn.send(self.__wrap(protocol.ACCEPT, "SERVER", "UserName Set"))
+            # Recieving Acknoledgement for REJECT
+            Rheader, Rsender, Rpayload = _parse(conn.recv(1024).decode("utf-8"))
+
+            # Recieving new username
+            header, sender, username = _parse(conn.recv(1024).decode("utf-8"))
+
+        conn.send(_wrap(protocol.ACCEPT, "SERVER", "UserName Set").encode("utf-8"))
+
+        # Recieving Acknoledgement for ACCEPT
+        Rheader, Rsender, Rpayload = _parse(conn.recv(1024).decode("utf-8"))
+
         logging.info("User set to " + username)
 
         # Adding Username to the list of users and lobby
-        self.users[username] = conn
-        self.rooms[currRoom].append(username)
+        self.users[username] = user(username, conn, "-")
+        self.joinRoom(username, "lobby")
 
         # Sending Welcome Message from Server
-        conn.send(
-            self.__wrap(
+        threading.Thread(
+            target=lambda username: self.sendMessageToUser(
+                username,
                 protocol.MESSAGE,
                 "SERVER",
                 "Welcome " + username + "!! Enter #help for the manual.",
-            )
-        )
+            ),
+            args=(username,),
+        ).start()
 
         # Recieving Incoming Messages
         while True:
-            msg = str(conn.recv(1024).decode("utf-8"))
-            logging.info("Recieved " + msg)
-
-            header, sender, payload = self.__parse(msg)
+            header, sender, payload = self.users[username].recieve()
 
             if header == protocol.EXIT:
-                self.leaveRoom(username, currRoom)
                 break
 
             elif header == protocol.HELP:
                 # Sending Help Message
-                conn.send(self.__wrap(protocol.HELP, "SERVER", helpmsg))
+                threading.Thread(
+                    target=lambda username: self.sendMessageToUser(
+                        username, protocol.HELP, "SERVER", helpmsg
+                    ),
+                    args=(username,),
+                ).start()
 
             elif header == protocol.MESSAGE:
-                if currRoom == "lobby":
-                    conn.send(
-                        self.__wrap(
-                            protocol.REJECT, "SERVER", "Join a room to send messages."
-                        )
-                    )
-                    continue
-
-                self.sendMessageToRoom(
-                    currRoom, self.__wrap(protocol.MESSAGE, username, payload)
-                )
+                threading.Thread(target=self.MESSAGE, args=(username, payload)).start()
 
             elif header == protocol.GETROOMLIST:
-                roomList = list(self.rooms.keys())
-                roomList.remove("lobby")
-
-                # Sending room list
-                conn.send(
-                    self.__wrap(protocol.ROOMLIST, "SERVER", json.dumps(roomList))
-                )
+                threading.Thread(target=self.GETROOMLIST, args=(username,)).start()
 
             elif header == protocol.CREATEROOM:
-
-                if payload == "lobby":
-                    logging.debug("New Room named lobby denied to " + sender)
-                    conn.send(
-                        self.__wrap(
-                            protocol.REJECT,
-                            "SERVER",
-                            "lobby is an invalid room name. try something else",
-                        )
-                    )
-
-                elif payload in self.rooms.keys():
-                    logging.debug(
-                        "New Room with Same name as existing denied to " + sender
-                    )
-                    conn.send(
-                        self.__wrap(
-                            protocol.REJECT, "SERVER", "Room name already taken."
-                        )
-                    )
-
-                elif len(payload) > 20:
-                    logging.debug(
-                        "Room Name " + payload + " is too big. Denied " + sender
-                    )
-                    conn.send(
-                        self.__wrap(
-                            protocol.REJECT,
-                            "SERVER",
-                            "Room name too big, Max Name Size is 20 characters",
-                        )
-                    )
-
-                elif len(payload) < 5:
-                    logging.debug(
-                        "Room Name " + payload + " is too small. Denied " + sender
-                    )
-                    conn.send(
-                        self.__wrap(
-                            protocol.REJECT,
-                            "SERVER",
-                            "Room name too small, Min Name Size is 5 characters",
-                        )
-                    )
-
-                else:
-                    # Creating New Room
-                    self.rooms[payload] = []
-
-                    self.leaveRoom(username, currRoom)
-                    currRoom = payload
-                    self.joinRoom(username, currRoom)
+                threading.Thread(
+                    target=self.CREATEROOM, args=(username, payload)
+                ).start()
 
             elif header == protocol.JOINROOM:
-                if payload not in self.rooms.keys() or payload == "lobby":
-                    conn.send(
-                        self.__wrap(
-                            protocol.REJECT, "SERVER", "Please Enter a valid room-name"
-                        )
-                    )
-                    logging.debug("Incorrect Room Name : " + payload + " by " + sender)
-
-                elif currRoom == payload:
-                    conn.send(
-                        self.__wrap(
-                            protocol.REJECT, "SERVER", "Already in the mentioned room"
-                        )
-                    )
-
-                else:
-                    self.leaveRoom(username, currRoom)
-                    currRoom = payload
-                    self.joinRoom(username, currRoom)
+                threading.Thread(target=self.JOINROOM, args=(username, payload)).start()
 
             elif header == protocol.LEAVEROOM:
-                if currRoom == "lobby":
-                    conn.send(self.__wrap(protocol.REJECT, "SERVER", "Not in any Room"))
+                threading.Thread(target=self.LEAVEROOM, args=(username,)).start()
 
-                else:
-                    self.leaveRoom(username, currRoom)
-                    currRoom = "lobby"
-                    self.joinRoom(username, currRoom)
+            elif header == protocol.ACKNOLEDGEMENT:
+                self.users[username].toggleAck()
 
             else:
-                conn.send(
-                    self.__wrap(protocol.REJECT, "SERVER", "Unknown Header: " + header)
-                )
-                logging.debug("Unknown header Recieved")
+                threading.Thread(target=self.UNKNOWNHEADER, args=(username,)).start()
+
+        currRoom = self.users[username].room
+
+        threading.Thread(target=self.leaveRoom, args=(username,)).start()
+
+        # Recieving Ack
+        if (currRoom != "lobby"):
+            header, sender, payload = self.users[username].recieve()
+            self.users[username].toggleAck()
 
         logging.info("Sending exit to " + username)
-        conn.send(self.__wrap(protocol.EXIT, "SERVER"))
+        threading.Thread(
+            target=lambda user: self.users[username].send(protocol.EXIT, "SERVER", ""),
+            args=(username,),
+        ).start()
+
+        header, sender, payload = self.users[username].recieve()
+        self.users[username].toggleAck()
 
         # Removing user for list
         x = self.users.pop(username)
@@ -276,20 +359,20 @@ class server:
 
         return True
 
-    def __wrap(self, header, sender, payload=""):
-        packet = (
-            header + sender.ljust(22, "_") + str(len(payload)).rjust(4, "0") + payload
-        )
 
-        return packet.encode("utf-8")
+def _wrap(header, sender, payload=""):
+    packet = header + sender.ljust(22, "_") + str(len(payload)).rjust(4, "0") + payload
 
-    # Parsing messages
-    def __parse(self, msg):
-        header = msg[0:8]
-        sender = msg[8:30].rstrip("_")
-        payload = msg[34:]
+    return packet
 
-        return (header, sender, payload)
+
+# Parsing messages
+def _parse(msg):
+    header = msg[0:8]
+    sender = msg[8:30].rstrip("_")
+    payload = msg[34:]
+
+    return (header, sender, payload)
 
 
 def Read_Config(filepath):

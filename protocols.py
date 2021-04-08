@@ -11,3 +11,4 @@ class protocol:
     MESSAGE = "MESSAGE_"
     UPDATE = "UPDATE__"
     EXIT = "EXIT____"
+    ACKNOLEDGEMENT = "ACK_____"
