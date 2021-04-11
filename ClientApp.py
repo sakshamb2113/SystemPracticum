@@ -1,10 +1,14 @@
+import json
+import sys
+import threading
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-import sys
+
 from Client import client
-import threading
 from protocols import protocol
+
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -20,7 +24,6 @@ class MainWindow(QMainWindow):
         self.dialog = self.connectDialog()
         self.dialog.exec_()
 
-
     # Establishing Connection
     def connect(self):
         self.client.connect()
@@ -29,10 +32,10 @@ class MainWindow(QMainWindow):
         self.dialog = self.usernameDialog()
         self.dialog.exec_()
 
-    # get Username Dialog 
+    # get Username Dialog
     def usernameDialog(self):
         dialog = ModalDialog(self)
-        dialog.setFixedSize(400,200)
+        dialog.setFixedSize(400, 200)
 
         usernameInput = QLineEdit(dialog)
         usernameInput.setPlaceholderText("Username...")
@@ -54,14 +57,14 @@ class MainWindow(QMainWindow):
         dialog.setLayout(dialogLayout)
 
         return dialog
-    
+
     # Sending Server the current Clients username
     def setUsername(self, username):
         self.client.setUsername(username)
         self.username = username
 
         header, sender, payload = self.client.getMesseges()
-        if (header != protocol.ACCEPT):
+        if header != protocol.ACCEPT:
             print(header, sender, payload)
             return
 
@@ -73,7 +76,7 @@ class MainWindow(QMainWindow):
     # Initial Dialog asking consent establish Connection
     def connectDialog(self):
         dialog = ModalDialog(self)
-        dialog.setFixedSize(400,200)
+        dialog.setFixedSize(400, 200)
 
         button = QPushButton("Contect", dialog)
         button.setDefault(True)
@@ -92,7 +95,6 @@ class MainWindow(QMainWindow):
         dialog.setLayout(dialogLayout)
 
         return dialog
-
 
     def SetupUI(self):
         self.centralWidget = QWidget(self)
@@ -122,36 +124,79 @@ class MainWindow(QMainWindow):
         self.centralLayout.addWidget(self.voiceButton, 6, 6, 1, 1)
 
         self.centralWidget.setLayout(self.centralLayout)
-    
-    # Wrapper for Sending Commands
+
+    # Sending Commands and messages as per the user input
     def sendMessage(self):
         message = self.inputField.text()
         self.inputField.setText("")
-        if (message != ""):
-            self.client.sendCommands(protocol.MESSAGE, message)
-    
+        if message != "":
+            if message[0] == "#":
+                splitted = message.split(" ")
+                command = splitted[0]
+                arg = ""
+                if len(splitted) >= 2:
+                    arg = splitted[1]
+
+                if command == "#help":
+                    self.client.sendCommands(protocol.HELP)
+                elif command == "#getrooms":
+                    self.client.sendCommands(protocol.GETROOMLIST)
+                elif command == "#joinroom":
+                    self.client.sendCommands(protocol.JOINROOM, arg)
+                elif command == "#createroom":
+                    self.client.sendCommands(protocol.CREATEROOM, arg)
+                elif command == "#exitroom":
+                    self.client.sendCommands(protocol.LEAVEROOM)
+                else:
+                    self.printcolored("Unknown Command : " + command, "red")
+            else:
+                self.client.sendCommands(protocol.MESSAGE, message)
+
+    # prints colored text into the chat's display box
+    def printcolored(self, msg, color):
+        self.chatDisplay.append("<font color=" + color + ">" + msg + "</font>")
+
     # Wrapper for recieving Incoming Messages
     def recieveMessage(self):
-        while (True):
+        while True:
             header, sender, payload = self.client.getMesseges()
-            if(header == protocol.EXIT):
+            if header == protocol.EXIT:
                 break
-            
-            elif (header == protocol.MESSAGE):
-                self.chatDisplay.append(sender + " > " + payload)
-            
+
+            elif header == protocol.MESSAGE:
+                self.printcolored(sender + "> " + payload, "white")
+
+            elif header == protocol.HELP:
+                self.printcolored(sender + "> " + payload, "Blue")
+
+            elif header == protocol.ROOMLIST:
+                self.printcolored(sender + "> " + payload, "white")
+
+            elif header == protocol.REJECT:
+                self.printcolored("Error> " + payload, "red")
+
+            elif header == protocol.ACCEPT:
+                self.printcolored(sender + "> " + payload, "green")
+
+            elif header == protocol.UPDATE:
+                self.printcolored(payload, "blue")
+
             else:
                 print("Unknown header : ", header)
-    
+
     # Closing socket when user tries to close the application
     def closeEvent(self, event):
-        reply = QMessageBox.question(self, 'Quit', 'Are You Sure to Quit?', QMessageBox.No | QMessageBox.Yes)
-        if (reply == QMessageBox.Yes):
+        reply = QMessageBox.question(
+            self, "Quit", "Are You Sure to Quit?", QMessageBox.No | QMessageBox.Yes
+        )
+        if reply == QMessageBox.Yes:
             # Informing Server about closing socket
             self.client.sendCommands(protocol.EXIT)
-            
-            # waiting for recieverThread to notice 
+
+            # waiting for recieverThread to notice
             self.recieverThread.join()
+
+            print("Threads Joined")
 
             # Closing Socket
             self.client.close()
@@ -168,7 +213,7 @@ def Read_Config(filepath):
         for line in file:
             line = line.split("=")
             config[line[0].strip()] = line[1].strip()
-    
+
     return config
 
 
