@@ -228,6 +228,19 @@ class server:
             currRoom = "lobby"
             self.joinRoom(username, currRoom)
 
+    def CHALLENGE(self, username, payload):
+        if payload not in self.users.keys():
+            self.sendMessageToUser(username, protocol.MESSAGE, "SERVER", "No User with govin username")
+            return
+
+        self.sendMessageToUser(payload, protocol.CHALLENGE_RECIEVED, username, username)
+
+    def CHALLENGE_ACCEPTED(self, username, payload):
+        self.sendMessageToUser(payload, protocol.CHALLENGE_ACCEPTED, username)
+
+    def CHALLENGE_REJECTED(self, username, payload):
+        self.sendMessageToUser(payload, protocol.CHALLENGE_REJECTED, username)
+
     def UNKNOWNHEADER(self, username):
         self.sendMessageToUser(
             username, protocol.REJECT, "SERVER", "Unknown Header: " + header
@@ -308,6 +321,15 @@ class server:
 
             elif header == protocol.ACKNOLEDGEMENT:
                 self.users[username].toggleAck()
+
+            elif header == protocol.CHALLENGE:
+                threading.Thread(target=self.CHALLENGE, args=(username, payload)).start()
+
+            elif header == protocol.CHALLENGE_ACCEPTED:
+                threading.Thread(target=self.CHALLENGE_ACCEPTED, args=(username, payload)).start()
+
+            elif header == protocol.CHALLENGE_REJECTED:
+                threading.Thread(target=self.CHALLENGE_REJECTED, args=(username, payload)).start()
 
             else:
                 threading.Thread(target=self.UNKNOWNHEADER, args=(username,)).start()

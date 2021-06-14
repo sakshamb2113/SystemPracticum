@@ -125,6 +125,46 @@ class MainWindow(QMainWindow):
 
         self.centralWidget.setLayout(self.centralLayout)
 
+    def presentChallenge(self, otherUser):
+        self.dialog = ModalDialog(self)
+        self.dialog.setFixedSize(400, 200)
+
+        label = QLabel(self.dialog)
+        label.setText("Challenge Recieved from " + otherUser)
+
+        acceptButton = QPushButton("Accept", self.dialog)
+        acceptButton.setDefault(True)
+        acceptButton.clicked.connect(lambda: self.challengeAccepted(otherUser))
+
+        rejectButton = QPushButton("Reject", self.dialog)
+        rejectButton.clicked.connect(lambda: self.challengeRejected(otherUser))        
+
+        innerLayout = QHBoxLayout()
+        innerLayout.addStretch()
+        innerLayout.addWidget(acceptButton)
+        innerLayout.addWidget(rejectButton)
+        innerLayout.addStretch()
+
+        dialogLayout = QVBoxLayout()
+        dialogLayout.addStretch()
+        dialogLayout.addWidget(label)
+        dialogLayout.addLayout(innerLayout)
+        dialogLayout.addStretch()
+
+        self.dialog.setLayout(dialogLayout)
+        self.dialog.exec_()
+
+    def challengeAccepted(self, otherUser):
+        self.client.sendCommands(protocol.CHALLENGE_ACCEPTED, otherUser)
+        self.dialog.close()
+
+    def challengeRejected(self, otherUser):
+        self.client.sendCommands(protocol.CHALLENGE_REJECTED, otherUser)
+        self.dialog.close()
+
+    def startGame(self):
+        print("Game Starts Now")
+
     # Sending Commands and messages as per the user input
     def sendMessage(self):
         message = self.inputField.text()
@@ -147,6 +187,8 @@ class MainWindow(QMainWindow):
                     self.client.sendCommands(protocol.CREATEROOM, arg)
                 elif command == "#exitroom":
                     self.client.sendCommands(protocol.LEAVEROOM)
+                elif command == "#challenge":
+                    self.client.sendCommands(protocol.CHALLENGE, arg)
                 else:
                     self.printcolored("Unknown Command : " + command, "red")
             else:
@@ -180,6 +222,16 @@ class MainWindow(QMainWindow):
 
             elif header == protocol.UPDATE:
                 self.printcolored(payload, "blue")
+
+            elif header == protocol.CHALLENGE_RECIEVED:
+                self.presentChallenge(sender)
+
+            elif header == protocol.CHALLENGE_ACCEPTED:
+                self.printcolored("Challenge Accepted ", "green")
+                self.startGame()
+
+            elif header == protocol.CHALLENGE_REJECTED:
+                self.printcolored("Challenge Rejected ", "red")
 
             else:
                 print("Unknown header : ", header)
