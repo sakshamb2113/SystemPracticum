@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import *
 
 from Client import client
 from protocols import protocol
+from GameClient import runGame
 
 
 class MainWindow(QMainWindow):
@@ -162,8 +163,10 @@ class MainWindow(QMainWindow):
         self.client.sendCommands(protocol.CHALLENGE_REJECTED, otherUser)
         self.dialog.close()
 
-    def startGame(self):
-        print("Game Starts Now")
+    def startGame(self, port):
+        print("Game Starts Now, port : " + port)
+
+        runGame(int(port))
 
     # Sending Commands and messages as per the user input
     def sendMessage(self):
@@ -228,10 +231,12 @@ class MainWindow(QMainWindow):
 
             elif header == protocol.CHALLENGE_ACCEPTED:
                 self.printcolored("Challenge Accepted ", "green")
-                self.startGame()
 
             elif header == protocol.CHALLENGE_REJECTED:
                 self.printcolored("Challenge Rejected ", "red")
+
+            elif header == protocol.CONNECTGAME:
+                self.startGame(payload)
 
             else:
                 print("Unknown header : ", header)

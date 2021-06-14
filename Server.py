@@ -5,6 +5,9 @@ from time import sleep
 import threading
 
 from protocols import protocol
+from GameServer import runGameServer
+
+gameport = 9562
 
 logging.basicConfig(
     filename="server.log",
@@ -230,16 +233,24 @@ class server:
 
     def CHALLENGE(self, username, payload):
         if payload not in self.users.keys():
-            self.sendMessageToUser(username, protocol.MESSAGE, "SERVER", "No User with govin username")
+            self.sendMessageToUser(username, protocol.MESSAGE, "SERVER", "No User with given username")
             return
 
-        self.sendMessageToUser(payload, protocol.CHALLENGE_RECIEVED, username, username)
+        self.sendMessageToUser(payload, protocol.CHALLENGE_RECIEVED, username)
 
     def CHALLENGE_ACCEPTED(self, username, payload):
         self.sendMessageToUser(payload, protocol.CHALLENGE_ACCEPTED, username)
 
+        self.START_GAME_SERVER([username, payload])
+
     def CHALLENGE_REJECTED(self, username, payload):
         self.sendMessageToUser(payload, protocol.CHALLENGE_REJECTED, username)
+
+    def START_GAME_SERVER(self, users):
+        threading.Thread(target=runGameServer, args=(gameport,)).start()
+
+        for user in users:
+            self.sendMessageToUser(user, protocol.CONNECTGAME, "SERVER", str(gameport))
 
     def UNKNOWNHEADER(self, username):
         self.sendMessageToUser(
