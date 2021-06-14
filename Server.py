@@ -156,6 +156,7 @@ class server:
         )
 
     def CREATEROOM(self, username, payload):
+        sender=username
         if payload == "lobby":
             logging.debug("New Room named lobby denied to " + sender)
             self.sendMessageToUser(
