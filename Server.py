@@ -151,11 +151,13 @@ class server:
         roomList.remove("lobby")
 
         # Sending room list
+
         self.sendMessageToUser(
             username, protocol.ROOMLIST, "SERVER", json.dumps(roomList)
         )
 
     def CREATEROOM(self, username, payload):
+        sender = username
         if payload == "lobby":
             logging.debug("New Room named lobby denied to " + sender)
             self.sendMessageToUser(
