@@ -77,3 +77,19 @@ def main():
 
 main()
 
+class GameClient:
+    
+    def __init__(self) -> None:
+        pygame.init()
+        self.font = pygame.font.SysFont('Courier New', 40)
+        self.window = pygame.display.set_mode((1000, 1000))
+        self.clock = pygame.time.Clock()
+        self.run = False
+    
+    def eventQueue(self,events):
+        for event in events:
+            if event.type == pygame.QUIT:
+                self.run = False
+    
+
+

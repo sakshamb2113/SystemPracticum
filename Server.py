@@ -73,13 +73,17 @@ class user:
 class server:
     def __init__(self, config):
         self.host = config["host"]
-        self.port = int(config["port"])
+        self.tcp_port = int(config["tcp_port"])
+        self.udp_port = int(config["udp_port"])
         self.users = {}
         self.rooms = {"lobby": []}
 
         # Setting up Main Server Socket
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.bind((self.host, self.port))
+        self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.tcp_socket.bind((self.host, self.tcp_port))
+
+        self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.tcp_socket.bind((self.host, self.udp_port))
 
         logging.info("Host : " + config["host"])
         logging.info("Port : " + str(config["port"]))
@@ -89,10 +93,10 @@ class server:
 
     def listen(self):
         while True:
-            self.socket.listen()
+            self.tcp_socket.listen()
 
             # accept a connection
-            conn, addr = self.socket.accept()
+            conn, addr = self.tcp_socket.accept()
 
             # Assign a new thread to a connection
             threading.Thread(target=self.interact, args=(conn,)).start()
@@ -157,11 +161,7 @@ class server:
         )
 
     def CREATEROOM(self, username, payload):
-<<<<<<< HEAD
-        sender = username
-=======
         sender=username
->>>>>>> 4b50160213b118a2c642c080729c547fb8c3f093
         if payload == "lobby":
             logging.debug("New Room named lobby denied to " + sender)
             self.sendMessageToUser(
