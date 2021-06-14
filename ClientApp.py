@@ -168,6 +168,8 @@ class MainWindow(QMainWindow):
 
         runGame(int(port))
 
+        self.client.sendCommands(protocol.DISCONNECTGAME, str(port))
+
     # Sending Commands and messages as per the user input
     def sendMessage(self):
         message = self.inputField.text()

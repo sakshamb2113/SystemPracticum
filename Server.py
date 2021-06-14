@@ -5,9 +5,10 @@ from time import sleep
 import threading
 
 from protocols import protocol
-from GameServer import runGameServer
+from GameServer import GameSocket
 
-gameport = 9562
+serverLock = threading.Lock()
+GameServer = {}
 
 logging.basicConfig(
     filename="server.log",
@@ -87,8 +88,22 @@ class server:
         logging.info("Host : " + config["host"])
         logging.info("Port : " + str(config["port"]))
 
+        self.START_GAME_SERVER()
+
         # Listening for incoming connection requests
         self.listen()
+
+    def START_GAME_SERVER(self):
+        # GameServer[10000] = GameSocket(self.host, 10000)
+        GameServer[10001] = GameSocket(self.host, 10001)
+        GameServer[10002] = GameSocket(self.host, 10002)
+        GameServer[10003] = GameSocket(self.host, 10003)
+        GameServer[10004] = GameSocket(self.host, 10004)
+        GameServer[10005] = GameSocket(self.host, 10005)
+        GameServer[10006] = GameSocket(self.host, 10006)
+        GameServer[10007] = GameSocket(self.host, 10007)
+        GameServer[10008] = GameSocket(self.host, 10008)
+        GameServer[10009] = GameSocket(self.host, 10009)
 
     def listen(self):
         while True:
@@ -241,18 +256,44 @@ class server:
     def CHALLENGE_ACCEPTED(self, username, payload):
         self.sendMessageToUser(payload, protocol.CHALLENGE_ACCEPTED, username)
 
-        self.START_GAME_SERVER([username, payload])
+        self.GIVESERVER([username, payload])
 
     def CHALLENGE_REJECTED(self, username, payload):
         self.sendMessageToUser(payload, protocol.CHALLENGE_REJECTED, username)
 
-    def START_GAME_SERVER(self, users):
-        threading.Thread(target=runGameServer, args=(gameport,)).start()
+    def DISCONNECTGAME(self, port):
+        port = int(port)
+
+        serverLock.acquire()
+
+        if (GameServer[port].total_players == 0):
+            GameServer[port].stop()
+
+        serverLock.release()
+
+    def GIVESERVER(self, users):
+        myport = -1
+        serverLock.acquire()
+        
+        for port in GameServer:
+            if (GameServer[port].AVAILABLE):
+                myport = port
+                break
+
+        serverLock.release()
+
+        if (myport == -1):
+            for user in users:
+                self.sendMessageToUser(user, protocol.MESSAGE, "SERVER", "No Ports Available.")
+
+            return
+
+        threading.Thread(target=GameServer[myport].start_room).start()
 
         for user in users:
-            self.sendMessageToUser(user, protocol.CONNECTGAME, "SERVER", str(gameport))
+            self.sendMessageToUser(user, protocol.CONNECTGAME, "SERVER", str(myport))
 
-    def UNKNOWNHEADER(self, username):
+    def UNKNOWNHEADER(self, username, header):
         self.sendMessageToUser(
             username, protocol.REJECT, "SERVER", "Unknown Header: " + header
         )
@@ -342,8 +383,11 @@ class server:
             elif header == protocol.CHALLENGE_REJECTED:
                 threading.Thread(target=self.CHALLENGE_REJECTED, args=(username, payload)).start()
 
+            elif header == protocol.DISCONNECTGAME:
+                threading.Thread(target=self.DISCONNECTGAME, args=(payload,)).start()
+
             else:
-                threading.Thread(target=self.UNKNOWNHEADER, args=(username,)).start()
+                threading.Thread(target=self.UNKNOWNHEADER, args=(username, header)).start()
 
         currRoom = self.users[username].room
 
