@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 
 from Client import client
 from protocols import protocol
-from GameClient import runGame
+from GameClient import ClientSocket
 
 
 class MainWindow(QMainWindow):
@@ -166,7 +166,8 @@ class MainWindow(QMainWindow):
     def startGame(self, port):
         print("Game Starts Now, port : " + port)
 
-        runGame(int(port))
+        obj = ClientSocket("127.0.0.1", int(port))
+        obj.startRun()
 
         self.client.sendCommands(protocol.DISCONNECTGAME, str(port))
 
