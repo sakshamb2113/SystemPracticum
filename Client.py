@@ -93,4 +93,4 @@ def Read_Config(filepath):
 if __name__ == "__main__":
     config = Read_Config(".config")
 
-    client(config)
+    client()
