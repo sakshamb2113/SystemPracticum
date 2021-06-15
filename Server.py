@@ -97,13 +97,13 @@ class server:
         # GameServer[10000] = GameSocket(self.host, 10000)
         GameServer[10001] = GameSocket(self.host, 10001)
         GameServer[10002] = GameSocket(self.host, 10002)
-        GameServer[10003] = GameSocket(self.host, 10003)
-        GameServer[10004] = GameSocket(self.host, 10004)
-        GameServer[10005] = GameSocket(self.host, 10005)
-        GameServer[10006] = GameSocket(self.host, 10006)
-        GameServer[10007] = GameSocket(self.host, 10007)
-        GameServer[10008] = GameSocket(self.host, 10008)
-        GameServer[10009] = GameSocket(self.host, 10009)
+        # GameServer[10003] = GameSocket(self.host, 10003)
+        # GameServer[10004] = GameSocket(self.host, 10004)
+        # GameServer[10005] = GameSocket(self.host, 10005)
+        # GameServer[10006] = GameSocket(self.host, 10006)
+        # GameServer[10007] = GameSocket(self.host, 10007)
+        # GameServer[10008] = GameSocket(self.host, 10008)
+        # GameServer[10009] = GameSocket(self.host, 10009)
 
     def listen(self):
         while True:
@@ -248,8 +248,14 @@ class server:
             self.joinRoom(username, currRoom)
 
     def CHALLENGE(self, username, payload):
-        if payload not in self.users.keys():
-            self.sendMessageToUser(username, protocol.MESSAGE, "SERVER", "No User with given username")
+        room = self.users[username].room
+
+        if room == '-' or room == "lobby":
+            self.sendMessageToUser(username, protocol.MESSAGE, "SERVER", "Please join a room before challenging")
+            return
+
+        if payload not in self.rooms[room]:
+            self.sendMessageToUser(username, protocol.MESSAGE, "SERVER", "No User with given username in current room")
             return
 
         self.sendMessageToUser(payload, protocol.CHALLENGE_RECIEVED, username)
@@ -392,7 +398,7 @@ class server:
 
         currRoom = self.users[username].room
 
-        threading.Thread(target=self.leaveRoom, args=(username,)).start()
+        self.leaveRoom(username)
 
         # Recieving Ack
         if (currRoom != "lobby"):
@@ -400,10 +406,7 @@ class server:
             self.users[username].toggleAck()
 
         logging.info("Sending exit to " + username)
-        threading.Thread(
-            target=lambda user: self.users[username].send(protocol.EXIT, "SERVER", ""),
-            args=(username,),
-        ).start()
+        self.users[username].send(protocol.EXIT, "SERVER", "")
 
         header, sender, payload = self.users[username].recieve()
         self.users[username].toggleAck()

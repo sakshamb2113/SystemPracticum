@@ -11,7 +11,7 @@ class ClientSocket:
         self.port = port
 
         self.font = pygame.font.SysFont('Courier New', 40)
-        self.window = pygame.display.set_mode((1000, 1000))
+        self.window = pygame.display.set_mode((500, 500))
         self.clock = pygame.time.Clock()
         self.run = False
 

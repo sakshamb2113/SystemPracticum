@@ -15,11 +15,14 @@ payload
 - LISTROOM : List of Available Rooms Sent by the Server
 - ROOMJOIN : Room Join Request
 - EXITROOM : Exit to lobby
+- CHLNG___ : Challenge another user to play
+- CHLNGACC : Accept Challenge
+- CHJNGREJ : Reject Challenge
+- CHLNGRCV : Recieved Challenge from some user
+- CONNGAME : Connect to Game Server
+- ENDGAME_ : Disconnected from Game Server
 - MESSAGE_ : Chat Message
 - EXIT____ : Close Connection
-- VCEJOIN_ : Voice Join Request
-- VOICEMSG : Voice Msg Transaction
-- EXITVCE_ : Close Voice Connection
 - GAMEJOIN : Game Join Request
 - GAMEUPDT : Game Info
 - EXITGAME : Game Exit Request
@@ -35,5 +38,5 @@ port=10000
  - activate the virtual env `source ./.env/bin/activate`
  - install the required libraries `pip install -r requirements.txt`
  - Run Server `python Server.py`
- - open multiple new terminals and activate virtual environment in them
+ - open one or multiple new terminals and activate virtual environment in them
  - Run Client in each of them `python ClientApp.py`

@@ -8,7 +8,7 @@ from Player import Player
 class GameSocket:
     
     MAX_CLIENTS = 4
-    GAME_SIZE = (800, 800)
+    GAME_SIZE = (500, 500)
     TIMEOUT_SECONDS = 4
     PORT = None
     AVAILABLE = False
