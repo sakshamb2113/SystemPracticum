@@ -1,0 +1,31 @@
+root - INFO - Connected to Server 127.0.0.1:20000
+root - INFO - Username Set To Shubham
+root - INFO - Recieved ACCEPT__SERVER________________0012UserName Set
+root - INFO - Sent Ack
+root - INFO - Recieved MESSAGE_SERVER________________0045Welcome Shubham!! Enter #help for the manual.
+root - INFO - Sent Ack
+root - INFO - Sending JOINROOMSaksham_______________0005room1
+root - INFO - Recieved UPDATE__SERVER________________0033Saksham has joined the room room1
+root - INFO - Sent Ack
+root - INFO - Recieved CHLNGRCVShubham_______________0000
+root - INFO - Sent Ack
+root - INFO - Sending CHLNGACCSaksham_______________0007Shubham
+root - INFO - Recieved CONNGAMESERVER________________000510001
+root - INFO - Sent Ack
+root - INFO - Sending MESSAGE_Saksham_______________0005heart
+root - INFO - Sending MESSAGE_Saksham_______________0003yes
+root - INFO - Sending ENDGAME_Saksham_______________000510001
+root - INFO - Recieved MESSAGE_Saksham_______________0005heart
+root - INFO - Sent Ack
+root - INFO - Recieved MESSAGE_Saksham_______________0003yes
+root - INFO - Sent Ack
+root - INFO - Recieved MESSAGE_SERVER________________0037Yay! Saksham guessed the right answer
+root - INFO - Sent Ack
+root - INFO - Sending EXIT____Saksham_______________0000
+root - INFO - Recieved 
+root - INFO - Sent Ack
+root - INFO - Recieved 
+root - INFO - Connection Closed
+O - Recieved UPDATE__SERVER________________0031Shubham has left the room room1
+root - INFO - Sent Ack
+root - INFO - Connection Closed

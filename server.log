@@ -1,0 +1,141 @@
+root - INFO - Host : 127.0.0.1
+root - INFO - Port : 20000
+root - INFO - New Connection Established
+root - INFO - User set to Saksham
+root - DEBUG - Saksham joining room lobby
+root - DEBUG - Acquiring lock on Saksham.send for  MESSAGE_SERVER________________0045Welcome Saksham!! Enter #help for the manual.
+root - DEBUG - Acquired lock on Saksham.send for  MESSAGE_SERVER________________0045Welcome Saksham!! Enter #help for the manual.
+root - INFO - Sending to Saksham : 		MESSAGE_SERVER________________0045Welcome Saksham!! Enter #help for the manual.
+root - INFO - Waiting for ack to MESSAGE_SERVER________________0045Welcome Saksham!! Enter #help for the manual.
+root - INFO - Recieved : 				ACK_____Saksham_______________0007Saksham
+root - DEBUG - Released lock on Saksham.send for  MESSAGE_SERVER________________0045Welcome Saksham!! Enter #help for the manual.
+root - INFO - Ack Recieved for MESSAGE_SERVER________________0045Welcome Saksham!! Enter #help for the manual.
+root - INFO - New Connection Established
+root - INFO - User set to Shubham
+root - DEBUG - Shubham joining room lobby
+root - DEBUG - Acquiring lock on Shubham.send for  MESSAGE_SERVER________________0045Welcome Shubham!! Enter #help for the manual.
+root - DEBUG - Acquired lock on Shubham.send for  MESSAGE_SERVER________________0045Welcome Shubham!! Enter #help for the manual.
+root - INFO - Sending to Shubham : 		MESSAGE_SERVER________________0045Welcome Shubham!! Enter #help for the manual.
+root - INFO - Waiting for ack to MESSAGE_SERVER________________0045Welcome Shubham!! Enter #help for the manual.
+root - INFO - Recieved : 				ACK_____Shubham_______________0007Shubham
+root - DEBUG - Released lock on Shubham.send for  MESSAGE_SERVER________________0045Welcome Shubham!! Enter #help for the manual.
+root - INFO - Ack Recieved for MESSAGE_SERVER________________0045Welcome Shubham!! Enter #help for the manual.
+root - INFO - Recieved : 				CREATERMShubham_______________0005room1
+root - DEBUG - Shubham leaving room lobby
+root - DEBUG - Shubham joining room room1
+root - DEBUG - Acquiring lock on Shubham.send for  UPDATE__SERVER________________0033Shubham has joined the room room1
+root - DEBUG - Acquired lock on Shubham.send for  UPDATE__SERVER________________0033Shubham has joined the room room1
+root - INFO - Sending to Shubham : 		UPDATE__SERVER________________0033Shubham has joined the room room1
+root - INFO - Waiting for ack to UPDATE__SERVER________________0033Shubham has joined the room room1
+root - INFO - Recieved : 				ACK_____Shubham_______________0007Shubham
+root - DEBUG - Released lock on Shubham.send for  UPDATE__SERVER________________0033Shubham has joined the room room1
+root - INFO - Ack Recieved for UPDATE__SERVER________________0033Shubham has joined the room room1
+root - INFO - Recieved : 				JOINROOMSaksham_______________0005room1
+root - DEBUG - Saksham leaving room lobby
+root - DEBUG - Saksham joining room room1
+root - DEBUG - Acquiring lock on Shubham.send for  UPDATE__SERVER________________0033Saksham has joined the room room1
+root - DEBUG - Acquired lock on Shubham.send for  UPDATE__SERVER________________0033Saksham has joined the room room1
+root - INFO - Sending to Shubham : 		UPDATE__SERVER________________0033Saksham has joined the room room1
+root - INFO - Waiting for ack to UPDATE__SERVER________________0033Saksham has joined the room room1
+root - INFO - Recieved : 				ACK_____Shubham_______________0007Shubham
+root - DEBUG - Released lock on Shubham.send for  UPDATE__SERVER________________0033Saksham has joined the room room1
+root - INFO - Ack Recieved for UPDATE__SERVER________________0033Saksham has joined the room room1
+root - DEBUG - Acquiring lock on Saksham.send for  UPDATE__SERVER________________0033Saksham has joined the room room1
+root - DEBUG - Acquired lock on Saksham.send for  UPDATE__SERVER________________0033Saksham has joined the room room1
+root - INFO - Sending to Saksham : 		UPDATE__SERVER________________0033Saksham has joined the room room1
+root - INFO - Waiting for ack to UPDATE__SERVER________________0033Saksham has joined the room room1
+root - INFO - Recieved : 				ACK_____Saksham_______________0007Saksham
+root - DEBUG - Released lock on Saksham.send for  UPDATE__SERVER________________0033Saksham has joined the room room1
+root - INFO - Ack Recieved for UPDATE__SERVER________________0033Saksham has joined the room room1
+root - INFO - Recieved : 				CHLNG___Shubham_______________0007Saksham
+root - DEBUG - Acquiring lock on Saksham.send for  CHLNGRCVShubham_______________0000
+root - DEBUG - Acquired lock on Saksham.send for  CHLNGRCVShubham_______________0000
+root - INFO - Sending to Saksham : 		CHLNGRCVShubham_______________0000
+root - INFO - Waiting for ack to CHLNGRCVShubham_______________0000
+root - INFO - Recieved : 				ACK_____Saksham_______________0007Saksham
+root - DEBUG - Released lock on Saksham.send for  CHLNGRCVShubham_______________0000
+root - INFO - Ack Recieved for CHLNGRCVShubham_______________0000
+root - INFO - Recieved : 				CHLNGACCSaksham_______________0007Shubham
+root - DEBUG - Acquiring lock on Shubham.send for  CHLNGACCSaksham_______________0000
+root - DEBUG - Acquired lock on Shubham.send for  CHLNGACCSaksham_______________0000
+root - INFO - Sending to Shubham : 		CHLNGACCSaksham_______________0000
+root - INFO - Waiting for ack to CHLNGACCSaksham_______________0000
+root - INFO - Recieved : 				ACK_____Shubham_______________0007Shubham
+root - DEBUG - Released lock on Shubham.send for  CHLNGACCSaksham_______________0000
+root - INFO - Ack Recieved for CHLNGACCSaksham_______________0000
+root - DEBUG - Acquiring lock on Shubham.send for  MESSAGE_SERVER________________0020Your word is : heart
+root - DEBUG - Acquired lock on Shubham.send for  MESSAGE_SERVER________________0020Your word is : heart
+root - INFO - Sending to Shubham : 		MESSAGE_SERVER________________0020Your word is : heart
+root - INFO - Waiting for ack to MESSAGE_SERVER________________0020Your word is : heart
+root - INFO - Recieved : 				ACK_____Shubham_______________0007Shubham
+root - DEBUG - Released lock on Shubham.send for  MESSAGE_SERVER________________0020Your word is : heart
+root - INFO - Ack Recieved for MESSAGE_SERVER________________0020Your word is : heart
+root - DEBUG - Acquiring lock on Saksham.send for  CONNGAMESERVER________________000510001
+root - DEBUG - Acquired lock on Saksham.send for  CONNGAMESERVER________________000510001
+root - INFO - Sending to Saksham : 		CONNGAMESERVER________________000510001
+root - INFO - Waiting for ack to CONNGAMESERVER________________000510001
+root - INFO - Recieved : 				ACK_____Saksham_______________0007Saksham
+root - DEBUG - Released lock on Saksham.send for  CONNGAMESERVER________________000510001
+root - INFO - Ack Recieved for CONNGAMESERVER________________000510001
+root - DEBUG - Acquiring lock on Shubham.send for  CONNGAMESERVER________________000510001
+root - DEBUG - Acquired lock on Shubham.send for  CONNGAMESERVER________________000510001
+root - INFO - Sending to Shubham : 		CONNGAMESERVER________________000510001
+root - INFO - Waiting for ack to CONNGAMESERVER________________000510001
+root - INFO - Recieved : 				ACK_____Shubham_______________0007Shubham
+root - DEBUG - Released lock on Shubham.send for  CONNGAMESERVER________________000510001
+root - INFO - Ack Recieved for CONNGAMESERVER________________000510001
+root - INFO - Recieved : 				MESSAGE_Saksham_______________0005heart
+root - DEBUG - Acquiring lock on Shubham.send for  MESSAGE_Saksham_______________0005heart
+root - DEBUG - Acquired lock on Shubham.send for  MESSAGE_Saksham_______________0005heart
+root - INFO - Sending to Shubham : 		MESSAGE_Saksham_______________0005heart
+root - INFO - Waiting for ack to MESSAGE_Saksham_______________0005heart
+root - INFO - Recieved : 				MESSAGE_Saksham_______________0003yes
+root - DEBUG - Acquiring lock on Shubham.send for  MESSAGE_Saksham_______________0003yes
+root - INFO - Recieved : 				ENDGAME_Shubham_______________000510001
+root - INFO - Recieved : 				ACK_____Shubham_______________0007Shubham
+root - DEBUG - Released lock on Shubham.send for  MESSAGE_Saksham_______________0005heart
+root - INFO - Ack Recieved for MESSAGE_Saksham_______________0005heart
+root - DEBUG - Acquiring lock on Saksham.send for  MESSAGE_Saksham_______________0005heart
+root - DEBUG - Acquired lock on Shubham.send for  MESSAGE_Saksham_______________0003yes
+root - INFO - Sending to Shubham : 		MESSAGE_Saksham_______________0003yes
+root - DEBUG - Acquired lock on Saksham.send for  MESSAGE_Saksham_______________0005heart
+root - INFO - Waiting for ack to MESSAGE_Saksham_______________0003yes
+root - INFO - Sending to Saksham : 		MESSAGE_Saksham_______________0005heart
+root - INFO - Waiting for ack to MESSAGE_Saksham_______________0005heart
+root - INFO - Recieved : 				ACK_____Shubham_______________0007Shubham
+root - DEBUG - Released lock on Shubham.send for  MESSAGE_Saksham_______________0003yes
+root - INFO - Ack Recieved for MESSAGE_Saksham_______________0003yes
+root - DEBUG - Acquiring lock on Saksham.send for  MESSAGE_Saksham_______________0003yes
+root - INFO - Recieved : 				ENDGAME_Saksham_______________000510001
+root - INFO - Recieved : 				ACK_____Saksham_______________0007Saksham
+root - DEBUG - Released lock on Saksham.send for  MESSAGE_Saksham_______________0005heart
+root - DEBUG - Acquired lock on Saksham.send for  MESSAGE_Saksham_______________0003yes
+root - INFO - Ack Recieved for MESSAGE_Saksham_______________0005heart
+root - INFO - Sending to Saksham : 		MESSAGE_Saksham_______________0003yes
+root - DEBUG - Acquiring lock on Shubham.send for  MESSAGE_SERVER________________0037Yay! Saksham guessed the right answer
+root - DEBUG - Acquired lock on Shubham.send for  MESSAGE_SERVER________________0037Yay! Saksham guessed the right answer
+root - INFO - Waiting for ack to MESSAGE_Saksham_______________0003yes
+root - INFO - Sending to Shubham : 		MESSAGE_SERVER________________0037Yay! Saksham guessed the right answer
+root - INFO - Recieved : 				ACK_____Saksham_______________0007Saksham
+root - INFO - Waiting for ack to MESSAGE_SERVER________________0037Yay! Saksham guessed the right answer
+root - INFO - Recieved : 				ACK_____Shubham_______________0007Shubham
+root - DEBUG - Released lock on Saksham.send for  MESSAGE_Saksham_______________0003yes
+root - INFO - Ack Recieved for MESSAGE_Saksham_______________0003yes
+root - DEBUG - Released lock on Shubham.send for  MESSAGE_SERVER________________0037Yay! Saksham guessed the right answer
+root - INFO - Ack Recieved for MESSAGE_SERVER________________0037Yay! Saksham guessed the right answer
+root - DEBUG - Acquiring lock on Saksham.send for  MESSAGE_SERVER________________0037Yay! Saksham guessed the right answer
+root - DEBUG - Acquired lock on Saksham.send for  MESSAGE_SERVER________________0037Yay! Saksham guessed the right answer
+root - INFO - Sending to Saksham : 		MESSAGE_SERVER________________0037Yay! Saksham guessed the right answer
+root - INFO - Waiting for ack to MESSAGE_SERVER________________0037Yay! Saksham guessed the right answer
+root - INFO - Recieved : 				ACK_____Saksham_______________0007Saksham
+root - DEBUG - Released lock on Saksham.send for  MESSAGE_SERVER________________0037Yay! Saksham guessed the right answer
+root - INFO - Ack Recieved for MESSAGE_SERVER________________0037Yay! Saksham guessed the right answer
+root - INFO - Recieved : 				EXIT____Shubham_______________0000
+root - DEBUG - Shubham leaving room room1
+root - DEBUG - Acquiring lock on Shubham.send for  UPDATE__SERVER________________0031Shubham has left the room room1
+root - DEBUG - Acquired lock on Shubham.send for  UPDATE__SERVER________________0031Shubham has left the room room1
+root - INFO - Sending to Shubham : 		UPDATE__SERVER________________0031Shubham has left the room room1
+root - INFO - Waiting for ack to UPDATE__SERVER________________0031Shubham has left the room room1
+root - INFO - Recieved : 				EXIT____Saksham_______________0000
+root - DEBUG - Saksham leaving room room1
+root - DEBUG - Acquiring lock on Shubham.send for  UPDATE__SERVER________________0031Saksham has left the room room1
